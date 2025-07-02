@@ -25,6 +25,7 @@ class _SudokuState extends State<Sudoku> {
 
   void generateNewSudoku() {
     setState(() {
+      yanlisSayisi=0;
       generator = SudokuGenerator(emptySquares: widget.emptySquares);
       puzzle = generator.newSudoku;
       solution = generator.newSudokuSolved;
@@ -50,29 +51,48 @@ class _SudokuState extends State<Sudoku> {
     } 
 
     showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(isCorrect ? 'Tebrikler!' : 'Yanlış Girişler Var' ),
-        content: Text(isCorrect ? "Doğru çözdün" : "Hatalar var"),
-        actions: [
+    context: context,
+    builder: (_) => AlertDialog(
+      title: Text(isCorrect
+          ? 'Tebrikler!'
+          : (yanlisSayisi >= 3 ? 'Hakkın Doldu' : 'Yanlış Girişler Var')),
+      content: Text(isCorrect
+          ? "Doğru çözdün"
+          : (yanlisSayisi >= 3
+              ? "3 defadan fazla hata yaptın. Ne yapmak istersin?"
+              : "Hatalar var")),
+      actions: [
+        if (yanlisSayisi >= 3) ...[
           TextButton(
-  onPressed: () {
-    Navigator.pop(context); // Önce dialogu kapat
-
-    if (yanlisSayisi >= 3) {
-        // Yanlış sayısı 3 veya daha fazla ise ana menüye dön ve Sudoku sayfasını stack'ten kaldır
-        Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => MyHomePage(title: "Sudoku Oyunu",)), // AnaMenu senin ana menü sayfan
-        (route) => false,
-      );
-    }
-    // Yanlış sayısı 3'ten küçükse hiçbir şey yapma, oyun devam eder
-  },
-  child: Text('Tamam'),
-),
-
-        ],
-      ),
+            onPressed: () {
+              Navigator.pop(context); // Dialogu kapat
+              // Ana sayfaya dön
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                    builder: (context) => MyHomePage(title: "Sudoku Oyunu")),
+                (route) => false,
+              );
+            },
+            child: Text('Ana Sayfa'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Dialogu kapat
+              // Yeni oyun başlat
+              generateNewSudoku();
+            },
+            child: Text('Yeni Oyun'),
+          ),
+        ] else ...[
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Sadece dialogu kapat
+            },
+            child: Text('Tamam'),
+          ),
+        ]
+      ],
+    ),
     );
   }
 
